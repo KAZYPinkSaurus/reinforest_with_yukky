@@ -4,17 +4,22 @@ from IPython.display import HTML
 from matplotlib import animation
 import numpy as np
 import matplotlib.pyplot as plt
+from logzero import logging
+import logzero
 
 
 np.random.seed(8)
 
 
 class MazeModel:
-    def __init__(self, theta, n_iter=1, verbose=False):
+    def __init__(self, theta, n_iter=1, verbose=False, loglevel=logging.ERROR):
+        logzero.loglevel(loglevel)
         self.THETA = theta
         self.PI = None
         self.n_iter = n_iter
         self.verbose = verbose
+        self.direction_map = {"up": 0, "right": 1, "down": 2, "left": 3}
+        self.direction = ["up", "right", "down", "left"]
 
 
 class SimpleModel(MazeModel):
@@ -70,7 +75,7 @@ class SimpleModel(MazeModel):
 
 class PolicyGradientMethodModel(MazeModel):
     def run(self):
-        if verbose:
+        if self.verbose:
             print(self.THETA)
 
         for iter in range(self.n_iter):
@@ -78,7 +83,7 @@ class PolicyGradientMethodModel(MazeModel):
             s_a_history = self.goal_maze_ret_s_a(self.PI)
             self.THETA = self.update_theta(self.THETA, self.PI, s_a_history)
             print(f"# of step :{len(s_a_history)-1}")
-            if verbose:
+            if self.verbose:
                 print("-" * 5)
 
         print("↑,→,↓, ←")
