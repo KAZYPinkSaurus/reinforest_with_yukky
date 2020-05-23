@@ -9,11 +9,10 @@ from work01 import MazeModel, SimpleModel, PolicyGradientMethodModel
 from logzero import logging, logger
 import logzero
 
-
 np.random.seed(8)
 
 
-class SarsaModel(MazeModel):
+class ValueIterationModel(MazeModel):
     def __init__(self, theta, n_iter, verbose, loglevel):
         super().__init__(theta, n_iter, verbose, loglevel)
         self.ETA = 0.1
@@ -31,11 +30,12 @@ class SarsaModel(MazeModel):
         for itr in range(self.n_iter):
             logger.info(f"itr:{itr}")
             self.EPSILON /= 2
+            # TODO:koko
             s_a_history = self.goal_maze_ret_s_a_Q()
             new_v = np.nanmax(self.Q, axis=1)
             logger.debug(f"V :{np.sum(np.abs(new_v - self.V))}")
             self.V = new_v
-            logging.info(f"# of step to goal:{len(s_a_history) - 1}.")
+            logger.info(f"# of step to goal:{len(s_a_history) - 1}.")
         return s_a_history
 
     def simple_convert_into_pi_from_theta(self):
@@ -50,34 +50,6 @@ class SarsaModel(MazeModel):
         pi = np.nan_to_num(pi)  # np.nan -> 0
 
         return pi
-
-    def goal_maze_ret_s_a_Q(self):
-        state = 0
-        action = action_next = self.get_action(state)
-        s_a_history = [[0, np.nan]]
-
-        while 1:
-            action = action_next
-            s_a_history[-1][1] = action
-            state_next = self.get_s_next(state, action)
-            s_a_history.append([state_next, np.nan])
-            if state_next == 8:
-                reward = 1
-                action_next = np.nan
-            else:
-                reward = 0
-                action_next = self.get_action(state_next)
-
-            self.Q[state, action] = self.sarsa(
-                state, action, reward, state_next, action_next
-            )
-
-            if state_next == 8:
-                break
-            else:
-                state = state_next
-
-        return s_a_history
 
     def get_action(self, state):
         if np.random.rand() < self.EPSILON:
@@ -100,13 +72,69 @@ class SarsaModel(MazeModel):
 
         return s_next
 
-    def sarsa(self, state, action, reward, s_next, a_next):
-        if s_next == 8:
+    def goal_maze_ret_s_a_Q(self):
+        state = 0
+        action = action_next = self.get_action(state)
+        s_a_history = [[0, np.nan]]
+
+        while 1:
+            action = action_next
+            s_a_history[-1][1] = action
+            state_next = self.get_s_next(state, action)
+            s_a_history.append([state_next, np.nan])
+            if state_next == 8:
+                reward = 1
+                action_next = np.nan
+            else:
+                reward = 0
+                action_next = self.get_action(state_next)
+
+            self.Q[state, action] = self.update_Q(
+                state=state,
+                action=action,
+                reward=reward,
+                state_next=state_next,
+                action_next=action_next,
+            )
+
+            if state_next == 8:
+                break
+            else:
+                state = state_next
+
+        return s_a_history
+
+    def update_Q(self, state, action, reward, state_next, action_next):
+        raise NotImplementedError()
+
+
+class SarsaModel(ValueIterationModel):
+    def update_Q(self, state, action, reward, state_next, action_next):
+
+        if state_next == 8:
             return self.Q[state, action] + self.ETA * (reward - self.Q[state, action])
         else:
             return self.Q[state, action] + self.ETA * (
-                reward + self.GAMMA * self.Q[s_next, a_next] - self.Q[state, action]
+                reward
+                + self.GAMMA * self.Q[state_next, action_next]
+                - self.Q[state, action]
             )
+
+        # v(s=7)=1
+        # # if s=4
+        # v(s=4)=r*v(s=7)
+        # v(s=4)=r*1
+        # # if s=3
+        # v(s=3)=r*v(s=4)
+        # v(s=3)=r*r*v(s=7)
+        # v(s=3)=r*r*1
+        # # if s=0
+        # # td:r*v(s=3)-v(s=0)
+        # v(s=0)=r*v(s=3)
+        # v(s=0)=r*r*v(s=4)
+        # v(s=0)=r*r*r*v(s=7)
+        # v(s=0)=r*r*r*1
+        # ゴールまでのrの数を減らしたい
 
 
 def main(model_no, n_iter, is_plot=False, verbose=False, loglevel=logging.ERROR):

@@ -4,7 +4,7 @@ from IPython.display import HTML
 from matplotlib import animation
 import numpy as np
 import matplotlib.pyplot as plt
-from logzero import logging
+from logzero import logging, logger
 import logzero
 
 
@@ -82,12 +82,10 @@ class PolicyGradientMethodModel(MazeModel):
             self.PI = self.softmax_convert_into_pi_from_theta()
             s_a_history = self.goal_maze_ret_s_a(self.PI)
             self.THETA = self.update_theta(self.THETA, self.PI, s_a_history)
-            print(f"# of step :{len(s_a_history)-1}")
+            logger.info(f"# of step :{len(s_a_history)-1}")
             if self.verbose:
-                print("-" * 5)
+                logger.info("-" * 5)
 
-        print("↑,→,↓, ←")
-        print(self.THETA)
         return s_a_history
 
     def softmax_convert_into_pi_from_theta(self):
