@@ -1,4 +1,8 @@
 # reinforest_with_yukky
 
-- 方策勾配法 work01
-- Sarsa work02
+## work01
+- 方策勾配法 
+## work02
+- Sarsa 
+## work03
+- Q学習 
