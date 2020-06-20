@@ -2,11 +2,7 @@
 name = "reinforest_with_yukky"
 version = "0.1.0"
 description = ""
-<<<<<<< HEAD
 authors = ["Your Name <you@example.com>"]
-=======
-authors = [""]
->>>>>>> d4c39c7af715cf9ea708e56ac7db0f5eb4de69c4
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -19,8 +15,4 @@ jupyter = "^1.0.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
-<<<<<<< HEAD
 build-backend = "poetry.masonry.api"
-=======
-build-backend = "poetry.masonry.api"
->>>>>>> d4c39c7af715cf9ea708e56ac7db0f5eb4de69c4
